@@ -4,18 +4,82 @@
 <title>DAT Colors</title>
 
 <script type='text/javascript' src='bower_components/jquery/dist/jquery.js'></script>
+<script type='text/javascript' src='bower_components/raphael/raphael.js'></script>
+<script type='text/javascript' src='bower_components/underscore/underscore.js'></script>
+
 <script type='text/javascript' src='lib/zi.js'></script>
 <script type='text/javascript' src='lib/darwa.js'></script>
 
 <script type='text/javascript'>
+
+  var evo = {};
+  evo.genePool = [];
+  evo.Scheme = function(){
+    var colors = [];
+    if (this.genePool.length>3){
+        colors = _.sample(this.genePool);
+        for (var i=0;i<colors.length;i++){
+          colors[i] = darwa.rgb(colors[i]);
+        }
+    } else {
+        for (var i=0;i<3+_.random(3);i++){
+            colors.push(darwa.rgb() );
+        }
+    }
+    return colors;
+  };
+
+  var app = {};
+  app.init=function(){
+    this.generateColorScheme();
+  };
+  
+  app.selection=null;
+  app.generateColorScheme = function(){
+      this.selection = evo.Scheme();
+      return this.selection;
+  };
+  app.injectColors = function(target){
+    target.clear();
+      for (var i=0;i<this.selection.length;i++){
+          target.circle(30+i*50,30+i,20).attr({fill:this.selection[i]});
+      }
+  };
+  
+
   $(document).ready(function(){
       zi.css();
+      var selectionCanvas = new Raphael('selection',500,300);
+      var selectionCanvasDimensions = {};
+      selectionCanvasDimensions.width = $("#selection").innerWidth();
+      selectionCanvasDimensions.height = $("#selection").innerHeight();
+      
+      app.init();
+      
+      //listeners
+      $("input[type=button]#live").on("click",function(){
+        console.log('fired')
+        evo.genePool.push(app.selection);
+        app.generateColorScheme();
+        app.injectColors(selectionCanvas);
+      });
+      $("input[type=button]#die").on("click",function(){
+        app.generateColorScheme();
+        app.injectColors(selectionCanvas);
+      });
   });
 </script>
 
 </head>
 <body >
-  <div><h1>Darwin Among the Colors</h1></div>
+  <h2>Current Generation</h2>
   <div id='canvas'></div>
+  <div id='selection'>
+      <input type='button' id='live' value='I Like It!'></input>
+      <input type='button' id='die' value='Next'></input>
+  </div>
+  <h2>the gene pool</h2>
+  <div id='gene-pool'></div>
+  <h1>Darwin Among the Colors</h1>
 </body>
 </html>
