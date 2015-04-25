@@ -14,7 +14,8 @@
 
   var evo = {};
   evo.genePool = [];
-  evo.sex = false;
+  evo.sex = true;
+  evo.generations = 20;
   evo.Scheme = function(){
     var colors = [];
     var delta = 0.3;
@@ -38,6 +39,8 @@
             colors.push(darwa.rgb() );
         }
     }
+    if (this.genePool.length>this.generations){this.genePool.shift();}
+    
     return colors;
   };
 
@@ -66,6 +69,8 @@
       var selectionCanvasDimensions = {};
       selectionCanvasDimensions.width = $("#selection").innerWidth();
       selectionCanvasDimensions.height = $("#selection").innerHeight();
+      
+      var genePoolCanvas = new Raphael('gene-pool',500,3000);
       
       app.init(selectionCanvas);
       
