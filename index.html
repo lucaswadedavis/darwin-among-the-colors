@@ -14,15 +14,27 @@
 
   var evo = {};
   evo.genePool = [];
+  evo.sex = false;
   evo.Scheme = function(){
     var colors = [];
+    var delta = 0.3;
     if (this.genePool.length>3){
-        colors = _.sample(this.genePool);
-        for (var i=0;i<colors.length;i++){
-          colors[i] = darwa.rgb(colors[i]);
+      if (this.sex = true){
+        var mom = _.sample(this.genePool).slice();
+        var dad = _.sample(this.genePool).slice();
+        var childLength = Math.random()>0.5 ? mom.length : dad.length;
+        for (var i=0;i<childLength;i++){
+          var locus = Math.random()>0.5 ? mom[i] : dad[i];
+          locus !== undefined ? colors.push(darwa.rgb(locus,delta)) : null;
         }
+      } else {
+        colors = _.sample(this.genePool).slice();
+        for (var i=0;i<colors.length;i++){
+          colors[i] = darwa.rgb(colors[i],delta);
+        }
+      }
     } else {
-        for (var i=0;i<3+_.random(3);i++){
+        for (var i=0;i<2+_.random(2);i++){
             colors.push(darwa.rgb() );
         }
     }
@@ -30,8 +42,9 @@
   };
 
   var app = {};
-  app.init=function(){
+  app.init=function(target){
     this.generateColorScheme();
+    this.displaySelectedColors(target);
   };
   
   app.selection=null;
@@ -39,7 +52,7 @@
       this.selection = evo.Scheme();
       return this.selection;
   };
-  app.injectColors = function(target){
+  app.displaySelectedColors = function(target){
     target.clear();
       for (var i=0;i<this.selection.length;i++){
           target.circle(30+i*50,30+i,20).attr({fill:this.selection[i]});
@@ -54,18 +67,17 @@
       selectionCanvasDimensions.width = $("#selection").innerWidth();
       selectionCanvasDimensions.height = $("#selection").innerHeight();
       
-      app.init();
+      app.init(selectionCanvas);
       
       //listeners
       $("input[type=button]#live").on("click",function(){
-        console.log('fired')
         evo.genePool.push(app.selection);
         app.generateColorScheme();
-        app.injectColors(selectionCanvas);
+        app.displaySelectedColors(selectionCanvas);
       });
       $("input[type=button]#die").on("click",function(){
         app.generateColorScheme();
-        app.injectColors(selectionCanvas);
+        app.displaySelectedColors(selectionCanvas);
       });
   });
 </script>
