@@ -15,10 +15,10 @@
   var evo = {};
   evo.genePool = [];
   evo.sex = true;
-  evo.generations = 20;
+  evo.generations = 10;
   evo.Scheme = function(){
     var colors = [];
-    var delta = 0.3;
+    var delta = 0.1;
     if (this.genePool.length>3){
       if (this.sex = true){
         var mom = _.sample(this.genePool).slice();
@@ -35,7 +35,7 @@
         }
       }
     } else {
-        for (var i=0;i<2+_.random(2);i++){
+        for (var i=0;i<3+_.random(2);i++){
             colors.push(darwa.rgb() );
         }
     }
@@ -43,8 +43,52 @@
     
     return colors;
   };
+  
+  var fitnessFunction = function(startingValue, goal, margin){
+    if (margin === undefined){margin = 0.1;}
+    if (typeof goal === 'number'){
+      fitnessFunction.number(startingValue, goal, margin);
+    } else {
+      return null;
+    }
+  };
+  
+  fitnessFunction.number = function(startingValue, goal, margin){
+    var generation = 0;
+    var generationLimit = 1000;
+    var initialDelta = Math.abs(startingValue-goal);
+    var bestValue = startingValue;
+    
+    var breed = function(val){
+      console.log(val);
+      generation ++;
+      if (generation>generationLimit){return;}
+      var delta = Math.abs(val-goal);
+      //base case
+      if (delta<initialDelta){
+        initialDelta = delta;
+        bestValue = val;
+      }
+      //console.log(startingValue, val, goal, margin);
+      // console.log(goal,margin);
+      // console.log(initialDelta, (goal*margin) );
+      
+      if (initialDelta < goal*margin){return; } 
+      
+      if ( Math.abs(val-goal) < Math.abs(startingValue-goal) ){
+        breed( darwa.float(val, 0.2) );
+      } else {
+        breed( darwa.float(startingValue), 0.2 );
+      }
+    };
+      
+    breed(startingValue);  
+    console.log("best value: ",bestValue,"at generation ",generation);
+    return bestValue;
+  };
 
   var app = {};
+  app.genePool = evo.genePool;
   app.init=function(target){
     this.generateColorScheme();
     this.displaySelectedColors(target);
@@ -61,16 +105,27 @@
           target.circle(30+i*50,30+i,20).attr({fill:this.selection[i]});
       }
   };
-  
+  app.displayGenePool = function(target){
+    target.clear();
+    var x = 0;
+    var y = 0;
+    for (var i=0;i<this.genePool.length;i++){
+      y = 20 + (i*40);
+      for (var j=0;j<this.genePool[i].length;j++){
+        x = 20 + (j*40);
+        target.circle(x,y,10).attr({fill:this.genePool[i][j]});
+      }
+    }
+  };
 
   $(document).ready(function(){
       zi.css();
-      var selectionCanvas = new Raphael('selection',500,300);
+      var selectionCanvas = new Raphael('selection',500,100);
       var selectionCanvasDimensions = {};
       selectionCanvasDimensions.width = $("#selection").innerWidth();
       selectionCanvasDimensions.height = $("#selection").innerHeight();
       
-      var genePoolCanvas = new Raphael('gene-pool',500,3000);
+      var genePoolCanvas = new Raphael('gene-pool',500,40*evo.generations+40);
       
       app.init(selectionCanvas);
       
@@ -79,10 +134,13 @@
         evo.genePool.push(app.selection);
         app.generateColorScheme();
         app.displaySelectedColors(selectionCanvas);
+        app.displayGenePool(genePoolCanvas);
       });
       $("input[type=button]#die").on("click",function(){
+        evo.genePool.length>evo.generations/2 ? evo.genePool.shift() : null;
         app.generateColorScheme();
         app.displaySelectedColors(selectionCanvas);
+        app.displayGenePool(genePoolCanvas);
       });
   });
 </script>
