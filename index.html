@@ -53,11 +53,14 @@
     }
   };
   
+  fitnessFunction.mutationDelta = 0.3
+  
   fitnessFunction.number = function(startingValue, goal, margin){
     var generation = 0;
     var generationLimit = 1000;
     var initialDelta = Math.abs(startingValue-goal);
     var bestValue = startingValue;
+    var mutationDelta = fitnessFunction.mutationDelta;
     
     var breed = function(val){
       console.log(val);
@@ -76,9 +79,9 @@
       if (initialDelta < goal*margin){return; } 
       
       if ( Math.abs(val-goal) < Math.abs(startingValue-goal) ){
-        breed( darwa.float(val, 0.2) );
+        breed( darwa.float(val, mutationDelta) );
       } else {
-        breed( darwa.float(startingValue), 0.2 );
+        breed( darwa.float(startingValue), mutationDelta );
       }
     };
       
