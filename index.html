@@ -18,7 +18,7 @@
   evo.generations = 10;
   evo.Scheme = function(){
     var colors = [];
-    var delta = 0.1;
+    var delta = 0.5;
     if (this.genePool.length>3){
       if (this.sex = true){
         var mom = _.sample(this.genePool).slice();
@@ -63,7 +63,7 @@
     var mutationDelta = fitnessFunction.mutationDelta;
     
     var breed = function(val){
-      //console.log(val);
+      console.log(val);
       generation ++;
       if (generation>generationLimit){return;}
       var delta = Math.abs(val-goal);
@@ -81,7 +81,7 @@
       if ( Math.abs(val-goal) < Math.abs(startingValue-goal) ){
         breed( darwa.float(val, mutationDelta) );
       } else {
-        breed( darwa.float(startingValue), mutationDelta );
+        breed( darwa.float(startingValue, mutationDelta) );
       }
     };
       
@@ -104,23 +104,37 @@
   };
   app.displaySelectedColors = function(target){
     target.clear();
+      var x = 0;
       for (var i=0;i<this.selection.length;i++){
-          target.circle(30+i*50,30+i,20).attr({fill:this.selection[i]});
+          x = ((500/this.selection.length)/2)+i*(500/this.selection.length);
+          target.circle(x,30+i,20).attr({fill:this.selection[i]});
       }
   };
   app.displayGenePool = function(target){
     target.clear();
     var x = 0;
     var y = 40;
-    var r = 30;
+    var w = 500/evo.generations;
+    var h = 500;
     for (var i=0;i<this.genePool.length;i++){
-      r = 30;
-      x = 30 + (i*55);
-      y = 40;
+      h = 80;
+      x = i*w;
+      y = 0;
       for (var j=0;j<this.genePool[i].length;j++){
-        r -= 5;
-        y = y+(2*r);
-        target.circle(x,y,r).attr({fill:this.genePool[i][j]});
+        h *= 0.75;
+        y = y+h;
+        target.rect(x,y,w,h)
+          .attr({fill:this.genePool[i][j],cursor:"pointer"})
+          .data("color",this.genePool[i][j])
+          .click(function(){
+            console.log(this.data("color"));
+            target.text(250,20,this.data("color"))
+              .attr({"font-size":32})
+              .animate({opacity:0},3000,"<",function(){
+                this.remove();
+              });
+          });
+        
       }
     }
   };
@@ -144,7 +158,7 @@
         app.displayGenePool(genePoolCanvas);
       });
       $("input[type=button]#die").on("click",function(){
-        evo.genePool.length>evo.generations/2 ? evo.genePool.shift() : null;
+        evo.genePool.length>evo.generations ? evo.genePool.shift() : null;
         app.generateColorScheme();
         app.displaySelectedColors(selectionCanvas);
         app.displayGenePool(genePoolCanvas);
@@ -158,6 +172,8 @@
   <div id='gene-pool'></div>
   <h2>Current Generation</h2>
   <div id='selection'>
+    
+      <br>
       <input type='button' id='live' value='I Like It!'></input>
       <input type='button' id='die' value='Next'></input>
   </div>
