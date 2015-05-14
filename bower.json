@@ -14,6 +14,9 @@
     "tests"
   ],
   "dependencies": {
-    "zi": "*"
+    "zi": "*",
+    "jquery":"*",
+    "underscore":"*",
+    "darwa":"*"
   }
 }
